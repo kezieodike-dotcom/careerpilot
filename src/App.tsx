@@ -86,6 +86,7 @@ export default function App() {
       sources: data.sources,
       syncRuns: data.syncRuns,
       consents: data.consents,
+      onboardingComplete: data.onboardingComplete,
     });
   }, [data]);
 
@@ -108,6 +109,7 @@ export default function App() {
     setData(prev => ({
       ...prev,
       profiles: { ...prev.profiles, [prev.activePersona]: profile },
+      onboardingComplete: true,
     }));
   };
 
@@ -329,6 +331,17 @@ export default function App() {
     resetStoredData();
     window.location.reload();
   };
+
+  if (!data.onboardingComplete) {
+    return (
+      <CreateProfileModal
+        profile={currentProfile}
+        onCreate={handleCreateProfile}
+        onClose={() => undefined}
+        welcome
+      />
+    );
+  }
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },

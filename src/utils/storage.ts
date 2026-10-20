@@ -31,6 +31,7 @@ const STORAGE_KEYS = {
   SOURCES: 'aca_sources',
   SYNC_RUNS: 'aca_sync_runs',
   CONSENTS: 'aca_consents',
+  ONBOARDING_COMPLETE: 'aca_onboarding_complete',
 };
 
 export function loadStoredData() {
@@ -39,6 +40,8 @@ export function loadStoredData() {
     
     const storedProfiles = localStorage.getItem(STORAGE_KEYS.PROFILES);
     const profiles: Record<PersonaType, Profile> = storedProfiles ? JSON.parse(storedProfiles) : INITIAL_PROFILES;
+    const storedOnboarding = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+    const onboardingComplete = storedOnboarding === null ? storedProfiles !== null : storedOnboarding === 'true';
     
     const storedFacts = localStorage.getItem(STORAGE_KEYS.FACTS);
     const facts: CareerFact[] = storedFacts ? JSON.parse(storedFacts) : INITIAL_FACTS;
@@ -67,6 +70,7 @@ export function loadStoredData() {
       sources,
       syncRuns,
       consents,
+      onboardingComplete,
     };
   } catch (e) {
     console.warn('Failed to load from localStorage, using initial mock data', e);
@@ -79,6 +83,7 @@ export function loadStoredData() {
       sources: INITIAL_SOURCES,
       syncRuns: INITIAL_SYNC_RUNS,
       consents: [],
+      onboardingComplete: false,
     };
   }
 }
@@ -92,6 +97,7 @@ export function saveStoredData(data: {
   sources?: OpportunitySource[];
   syncRuns?: SourceSyncRun[];
   consents?: ConsentRecord[];
+  onboardingComplete?: boolean;
 }) {
   try {
     if (data.activePersona) localStorage.setItem(STORAGE_KEYS.ACTIVE_PERSONA, data.activePersona);
@@ -102,6 +108,7 @@ export function saveStoredData(data: {
     if (data.sources) localStorage.setItem(STORAGE_KEYS.SOURCES, JSON.stringify(data.sources));
     if (data.syncRuns) localStorage.setItem(STORAGE_KEYS.SYNC_RUNS, JSON.stringify(data.syncRuns));
     if (data.consents) localStorage.setItem(STORAGE_KEYS.CONSENTS, JSON.stringify(data.consents));
+    if (typeof data.onboardingComplete === 'boolean') localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, String(data.onboardingComplete));
   } catch (e) {
     console.warn('Failed to save to localStorage', e);
   }
