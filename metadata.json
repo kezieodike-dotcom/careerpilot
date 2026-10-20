@@ -1,0 +1,6 @@
+{
+  "name": "Career Pilot",
+  "description": "Intelligent career and opportunity platform with grounded AI profiling, opportunity discovery, fit analysis, document tailoring, and application management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

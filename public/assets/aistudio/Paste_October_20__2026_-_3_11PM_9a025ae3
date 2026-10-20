@@ -1,0 +1,1103 @@
+# PRODUCT REQUIREMENTS DOCUMENT (PRD)
+## AI Career Agent — Intelligent Career & Opportunity Platform
+
+**Document Status:** Draft for Product and Technical Review  
+**Version:** 1.0
+
+---
+
+## 1. Executive Summary
+
+The AI Career Agent is an intelligent career and opportunity platform designed to help individuals discover relevant opportunities, understand their suitability, prepare stronger applications, and manage their career search from one place.
+
+The platform combines AI-powered career profiling, opportunity discovery, fit analysis, application document generation, application management, and personalized recommendations.
+
+Rather than functioning as a conventional job board, the platform acts as a career assistant that supports users throughout the opportunity-seeking process.
+
+Users will be able to discover jobs, internships, fellowships, scholarships, grants, graduate programmes, and other relevant opportunities through multiple sources. The system will evaluate opportunities against each user's skills, qualifications, experience, preferences, and career goals.
+
+The platform will also help users prepare tailored CVs, cover letters, and application responses. Applications requiring external submission will remain under the user's control, with explicit approval required before any supported submission action is performed.
+
+The initial product will target a global audience and support both individual users seeking career opportunities and the broader platform ecosystem.
+
+## 2. Problem Statement
+
+Finding and applying for suitable career opportunities is often fragmented, repetitive, and time-consuming.
+
+Job seekers frequently face the following challenges:
+
+- Opportunities are scattered across job boards, company career pages, professional networks, and other websites.
+- Many people apply for roles without understanding how closely their qualifications match the requirements.
+- Tailoring CVs and cover letters for different applications requires significant effort.
+- Applicants repeatedly enter the same personal, educational, and professional information.
+- It is difficult to track applications, deadlines, follow-ups, and outcomes across different platforms.
+- Users may miss suitable opportunities because they do not know where to look.
+- Generic AI-generated applications can contain inaccurate claims, invented experience, or information that does not reflect the applicant.
+- Existing tools often address individual parts of the process instead of providing a connected career-management experience.
+
+The AI Career Agent aims to address these challenges through a centralized, personalized, and AI-assisted workflow.
+
+## 3. Product Vision and Mission
+
+### Vision
+
+To become a trusted AI-powered career companion that helps people discover opportunities, present their qualifications effectively, and make better career decisions.
+
+### Mission
+
+To make career opportunities easier to find, evaluate, pursue, and manage by combining intelligent recommendations, grounded AI assistance, and user-controlled application workflows.
+
+### Product Principles
+
+1. **User control:** Users retain control over their career information and application decisions.
+2. **Accuracy over fabrication:** The AI must not invent qualifications, employment history, achievements, or other personal facts.
+3. **Relevance over volume:** The platform should prioritize opportunities that match the user's profile and goals.
+4. **Transparency:** Users should understand why an opportunity is recommended and what information supports the recommendation.
+5. **Privacy by design:** Personal documents and career information must be appropriately protected.
+6. **Practical automation:** Automate repetitive work while preserving human review where decisions or external actions require approval.
+7. **Global accessibility:** Design the platform for users seeking opportunities across different countries, industries, and career stages.
+8. **Extensibility:** The platform should support additional opportunity sources, categories, and integrations without requiring a complete redesign.
+
+## 4. Product Goals
+
+The platform should:
+
+- Provide a personalized career profile that users can build and maintain.
+- Discover relevant opportunities from multiple sources.
+- Explain how well each opportunity matches the user's profile.
+- Recommend actions that improve a user's suitability for specific opportunities.
+- Generate tailored application materials using verified user information.
+- Reduce repetitive work in preparing applications.
+- Provide a centralized dashboard for application tracking and deadlines.
+- Support review and approval before application submissions.
+- Help users understand their application performance and improve their approach.
+- Provide an administrative interface for managing platform operations and monitoring quality.
+
+### Success Definition
+
+The product should demonstrate that a user can move through a connected workflow:
+
+**Build profile → Discover opportunities → Assess fit → Prepare application → Review and approve → Submit through a supported process → Track outcomes.**
+
+Success is measured by the usefulness, accuracy, reliability, and adoption of this workflow rather than by the number of AI features alone.
+
+## 5. Target Users and Personas
+
+### 5.1 Active Job Seeker
+
+An individual actively searching for employment across industries, companies, and locations.
+
+**Needs:**
+- Relevant job recommendations.
+- CV and cover letter tailoring.
+- Application tracking.
+- Deadline reminders.
+- Clear explanations of job fit.
+
+### 5.2 Early-Career Professional
+
+A student, recent graduate, or early-career professional looking for entry-level roles, internships, graduate programmes, fellowships, or other career-building opportunities.
+
+**Needs:**
+- Opportunities aligned with education and skills.
+- Help identifying transferable skills.
+- Guidance on eligibility requirements.
+- Support preparing credible application materials.
+- Recommendations for improving career readiness.
+
+### 5.3 Multi-Opportunity Seeker
+
+An individual pursuing several opportunity categories, such as jobs, scholarships, fellowships, grants, internships, and professional programmes.
+
+**Needs:**
+- A unified discovery experience.
+- Category-specific eligibility checks.
+- Deadline and requirement tracking.
+- A consolidated opportunity pipeline.
+
+### 5.4 Platform Administrator
+
+An authorized person responsible for platform quality, source management, user support, and operational oversight.
+
+**Needs:**
+- Visibility into source health and ingestion activity.
+- Tools to review problematic or duplicate opportunities.
+- Monitoring of AI quality and system errors.
+- User and access management.
+- Operational analytics and audit trails.
+
+## 6. Scope and Product Boundaries
+
+### 6.1 Minimum Viable Product (MVP)
+
+The MVP includes:
+
+- User authentication and onboarding.
+- Career profile creation and editing.
+- CV upload and information extraction.
+- Opportunity discovery from multiple supported sources.
+- Manual opportunity URL import.
+- Opportunity deduplication and normalization.
+- Personalized recommendations and fit analysis.
+- Tailored CV and cover letter generation.
+- Application question drafting.
+- Application material review, editing, versioning, and export.
+- User approval before supported external submission actions.
+- Application tracking and deadline management.
+- Basic reminders and notifications.
+- Administrative monitoring and source management.
+- Essential analytics, security controls, and audit logging.
+
+### 6.2 Post-MVP Capabilities
+
+Potential subsequent capabilities include:
+
+- Broader automated opportunity-source integrations.
+- Supported application submission integrations.
+- Browser-assisted application completion.
+- More advanced career coaching and skill-gap analysis.
+- Interview preparation and practice.
+- Career-path recommendations.
+- Application outcome analytics and personalized improvement suggestions.
+- Additional opportunity categories and geographic coverage.
+- Team, institutional, university, or workforce-development features.
+- More advanced integrations with professional profiles and career platforms.
+
+These capabilities should be introduced based on user demand, technical feasibility, source permissions, and demonstrated product value.
+
+### 6.3 Explicit Exclusions
+
+The initial release will not promise:
+
+- Guaranteed job placement or application success.
+- Unrestricted automated submission to every external website.
+- Circumvention of CAPTCHAs, access controls, or website restrictions.
+- Fabricated qualifications, experience, references, or achievements.
+- Automatic acceptance of offers or other consequential decisions on a user's behalf.
+- Unauthorized scraping or use of data in violation of applicable source terms.
+- Unreviewed AI actions that create external commitments for users.
+
+## 7. Information Architecture
+
+The main application should contain the following areas.
+
+### 7.1 Dashboard
+
+The central overview of a user's career-search activity.
+
+It should display:
+- Recommended opportunities.
+- Recently discovered opportunities.
+- Applications in progress.
+- Upcoming deadlines.
+- Tasks requiring user attention.
+- Profile completeness.
+- Relevant alerts and reminders.
+- Summary statistics for application activity.
+
+### 7.2 Discover Opportunities
+
+The discovery workspace should allow users to:
+
+- Browse opportunities across supported categories.
+- Search by keywords, role, organization, location, and other relevant attributes.
+- Filter by eligibility, experience level, work arrangement, deadline, and opportunity type where data is available.
+- Sort results by relevance, recency, deadline, or other useful criteria.
+- Save opportunities.
+- View detailed requirements.
+- Review AI-generated fit assessments.
+- Import an opportunity using its URL when supported.
+- Report outdated, inaccurate, or duplicate listings.
+
+### 7.3 Career Profile
+
+The user's career information and source of truth for application preparation.
+
+It should contain:
+- Personal and professional summary.
+- Education.
+- Employment and volunteer experience.
+- Projects.
+- Skills and competencies.
+- Certifications.
+- Achievements.
+- Languages.
+- Career interests and goals.
+- Preferred industries and role types.
+- Preferred locations and work arrangements.
+- Relevant eligibility information.
+- Uploaded CVs and supporting documents.
+
+Users must be able to review, correct, and update extracted information.
+
+### 7.4 Application Studio
+
+The workspace for preparing application materials.
+
+It should support:
+- Tailored CV generation.
+- Cover letter generation.
+- Application question drafting.
+- Responses to role-specific screening questions.
+- Editing and refinement.
+- Comparison against the original source information.
+- Document versioning.
+- Export to supported formats.
+- Opportunity-specific application packages.
+
+### 7.5 Applications
+
+The application-management workspace should provide:
+
+- A centralized list of applications.
+- Application status tracking.
+- Application dates and deadlines.
+- Links to the original opportunity and application destination.
+- Saved application materials.
+- Submission confirmation records.
+- Follow-up reminders.
+- Interview and outcome records.
+- Notes and next steps.
+
+### 7.6 Settings
+
+Users should be able to manage:
+
+- Account information.
+- Notification preferences.
+- Career preferences.
+- Data and document permissions.
+- AI personalization preferences where applicable.
+- Connected integrations.
+- Consent and automation settings.
+- Data export and account deletion requests.
+
+## 8. Functional Requirements
+
+### 8.1 Authentication and Onboarding
+
+**FR-001 — User Authentication**
+
+The platform must provide secure registration, login, logout, and account recovery through a supported authentication system.
+
+**FR-002 — Onboarding**
+
+The platform should collect essential information about a user's career goals, preferred opportunity types, skills, experience, locations, and other relevant preferences.
+
+Users must be able to skip nonessential questions and complete their profiles later.
+
+**FR-003 — Career Profile Management**
+
+Users must be able to create, view, edit, and maintain their career profiles.
+
+### 8.2 CV and Document Management
+
+**FR-004 — CV Upload and Extraction**
+
+Users must be able to upload supported CV formats.
+
+The platform should extract structured information such as education, employment history, skills, projects, certifications, and achievements.
+
+Extracted information must be presented for review before it is treated as verified profile information.
+
+**FR-005 — Career Fact Management**
+
+The system must distinguish between verified user-provided information, extracted information awaiting confirmation, and AI-generated suggestions.
+
+The AI must not treat an unverified inference as a confirmed personal fact.
+
+**FR-006 — Document Storage and Versioning**
+
+The platform must securely store career documents and maintain versions of generated application materials.
+
+Users should be able to identify the document used for each application.
+
+### 8.3 Opportunity Discovery
+
+**FR-007 — Multi-Source Opportunity Discovery**
+
+The platform must support opportunity discovery from multiple sources, subject to technical feasibility, source permissions, and applicable terms.
+
+Supported sources may include:
+
+- Public job and opportunity APIs.
+- Licensed opportunity feeds.
+- Company career pages.
+- Applicant tracking system integrations.
+- Supported job boards.
+- Public fellowship, scholarship, grant, and programme listings.
+- User-submitted opportunity URLs.
+- Other approved sources.
+
+The system should retain source attribution and the original opportunity URL.
+
+**FR-008 — Opportunity Normalization**
+
+The platform must normalize opportunity data into a consistent structure.
+
+Relevant fields should include:
+- Opportunity title.
+- Organization.
+- Opportunity category.
+- Description.
+- Location.
+- Work arrangement.
+- Employment or programme type.
+- Required qualifications.
+- Required and preferred skills.
+- Experience requirements.
+- Eligibility criteria.
+- Compensation or funding details when available.
+- Application deadline.
+- Publication date where available.
+- Application destination.
+- Source and last-verified information where available.
+
+Unknown information must remain unknown rather than being fabricated.
+
+**FR-009 — Deduplication**
+
+The system must identify likely duplicate opportunities across sources.
+
+Deduplication should consider identifiers, organization, title, destination URL, and other relevant attributes.
+
+When duplicate listings are consolidated, the platform should preserve useful source attribution and avoid losing material differences between listings.
+
+**FR-010 — Search, Filters, and Saved Opportunities**
+
+Users must be able to search and filter opportunities and save relevant listings for later review.
+
+**FR-011 — Manual Opportunity Import**
+
+Users should be able to submit a supported opportunity URL for extraction and analysis.
+
+The platform must validate the URL, handle inaccessible pages gracefully, and clearly indicate when information cannot be extracted or verified.
+
+### 8.4 AI Matching and Recommendations
+
+**FR-012 — Opportunity Fit Analysis**
+
+The system must evaluate an opportunity against the user's career profile.
+
+The analysis should consider:
+- Skills alignment.
+- Education and qualification requirements.
+- Experience requirements.
+- Eligibility criteria.
+- Location and work preferences.
+- Relevant projects and achievements.
+- Other opportunity-specific requirements.
+
+The platform should explain the reasons behind its recommendations.
+
+**FR-013 — Fit Score and Confidence**
+
+The system may provide a fit score or suitability classification, provided the methodology is transparent and sufficiently grounded in available information.
+
+The score must not be presented as a probability of getting hired unless that interpretation has been empirically validated.
+
+Missing information should be identified explicitly. A high score must not conceal a failure to meet a mandatory eligibility requirement.
+
+**FR-014 — Skill-Gap Analysis**
+
+For a given opportunity, the platform should identify:
+
+- Skills the user appears to meet.
+- Requirements that are partially met.
+- Requirements that are not evidenced in the user's profile.
+- Potential improvements to the user's profile or application.
+- Whether a mandatory requirement appears unmet.
+
+The system must distinguish between lacking evidence and confirmed lack of a skill.
+
+### 8.5 Application Preparation
+
+**FR-015 — Tailored CV Generation**
+
+The platform must generate a role-specific CV using the user's verified career information and the opportunity requirements.
+
+It should improve relevance, organization, clarity, and emphasis without inventing qualifications or achievements.
+
+**FR-016 — Cover Letter Generation**
+
+The platform must generate a tailored cover letter that reflects the role, organization, and user's verified background.
+
+Users must be able to edit the result before using it.
+
+**FR-017 — Application Question Drafting**
+
+The system should draft responses to application questions using the user's verified information and the supplied opportunity details.
+
+It must flag questions that require additional personal information rather than inventing an answer.
+
+**FR-018 — Editing, Versioning, and Export**
+
+Users must be able to review, edit, save, compare, and export generated materials in supported formats.
+
+The platform should maintain a relationship between each application and the relevant document versions.
+
+### 8.6 Application Submission and Tracking
+
+**FR-019 — Approval-Gated Application Actions**
+
+Explicit user approval is required before any supported external application submission is performed.
+
+The user should be able to review the destination, application materials, answers, and relevant details before confirming the action.
+
+Approval must be specific to the action being taken and must not be interpreted as unrestricted consent for future submissions.
+
+**FR-020 — Submission Methods**
+
+The platform should initially support preparing and exporting application materials, linking users to the original application destination, and recording submission details.
+
+Integrated submission or browser-assisted completion may be introduced for supported destinations where permitted.
+
+The platform must not claim an application was submitted unless submission was confirmed through an appropriate mechanism or explicitly recorded by the user.
+
+**FR-021 — Application Pipeline**
+
+Users must be able to track applications through configurable statuses, such as:
+
+- Interested.
+- Saved.
+- Preparing.
+- Awaiting review.
+- Ready to submit.
+- Submitted.
+- Assessment.
+- Interview.
+- Offer.
+- Rejected.
+- Withdrawn.
+- Closed.
+
+The platform should record relevant status changes and allow users to add notes.
+
+**FR-022 — Reminders and Follow-Ups**
+
+The platform should support reminders for application deadlines, planned follow-ups, interviews, and other user-defined activities.
+
+Users must be able to manage their notification preferences.
+
+## 9. AI System Requirements
+
+### 9.1 Grounded Generation
+
+AI-generated outputs must be grounded in the user's verified profile, relevant documents, and the opportunity information available to the system.
+
+The platform should distinguish:
+- Facts supported by the user's information.
+- Information stated in the opportunity listing.
+- AI-generated recommendations.
+- Missing or unverified information.
+
+### 9.2 Hallucination Prevention
+
+The AI system must not invent:
+
+- Employment history.
+- Educational qualifications.
+- Certifications.
+- Professional experience.
+- Quantified achievements.
+- Projects.
+- References.
+- Eligibility information.
+- Application submission confirmations.
+
+When required information is missing, the system should ask the user or clearly flag the omission.
+
+### 9.3 External Content Safety
+
+Opportunity descriptions, imported pages, uploaded documents, and other external content must be treated as untrusted input.
+
+Instructions embedded in external content must not override the platform's system rules, expose private information, or trigger unauthorized actions.
+
+### 9.4 Recommendation Explainability
+
+Recommendations should include concise explanations of:
+- Why the opportunity is relevant.
+- Which profile attributes support the match.
+- Which mandatory requirements appear satisfied or unmet.
+- What important information is missing.
+- What the user could improve before applying.
+
+### 9.5 AI Evaluation
+
+The platform should evaluate AI performance against representative cases, including:
+
+- Accurate profile extraction.
+- Incorrect or ambiguous CV information.
+- Strong and weak opportunity matches.
+- Mandatory eligibility failures.
+- Missing application details.
+- Unsupported claims in generated documents.
+- Malicious instructions embedded in external content.
+- Incorrect opportunity dates or deadlines.
+- Requests to perform unapproved external actions.
+
+Quality evaluation should include factual accuracy, relevance, consistency, usability, and safety.
+
+## 10. Technical Architecture
+
+The platform should use a modular architecture that supports maintainability, security, and future expansion.
+
+### 10.1 Recommended Technology Stack
+
+**Frontend and application layer**
+- Next.js.
+- TypeScript.
+- A reusable component system.
+- Responsive web interface.
+
+**Backend and database**
+- Supabase.
+- PostgreSQL.
+- Supabase Auth or an equivalent supported authentication service.
+- Private object storage for career documents.
+
+**AI services**
+- An abstraction layer for supported AI providers.
+- Structured outputs for extraction and matching tasks.
+- Retrieval and grounding mechanisms where appropriate.
+- Evaluation and logging for critical AI workflows.
+
+**Search and discovery**
+- PostgreSQL full-text search for initial discovery needs.
+- Structured filters and indexing.
+- A dedicated search service or vector search where justified by product requirements.
+
+**Background processing**
+- Durable jobs for source ingestion, document processing, AI generation, reminders, and other asynchronous operations.
+- Retry handling, error tracking, and idempotency controls.
+
+**Document generation**
+- Supported PDF and DOCX generation.
+- Secure document rendering and export.
+- Versioned application materials.
+
+**Monitoring**
+- Application error tracking.
+- Background job monitoring.
+- AI usage and cost monitoring.
+- Source health monitoring.
+- Security and audit logging.
+
+### 10.2 Architecture Principles
+
+- Keep business logic separate from user interface components.
+- Use modular services and clear internal interfaces.
+- Avoid unnecessary distributed-system complexity.
+- Make AI providers replaceable without rewriting core product logic.
+- Make opportunity sources independently maintainable.
+- Use durable background processing for work that should survive request failures.
+- Keep credentials and sensitive operations on the server side.
+- Maintain consistent authorization checks across the application.
+
+## 11. Data Model
+
+The initial data model should include the following entities.
+
+### 11.1 `profiles`
+
+Stores user profile and career preference information.
+
+Possible fields:
+- `id`
+- `user_id`
+- `full_name`
+- `professional_summary`
+- `career_goals`
+- `preferred_roles`
+- `preferred_locations`
+- `preferred_work_arrangements`
+- `preferred_opportunity_types`
+- `profile_completeness`
+- `created_at`
+- `updated_at`
+
+### 11.2 `career_facts`
+
+Stores structured career facts and their verification state.
+
+Possible fields:
+- `id`
+- `user_id`
+- `fact_type`
+- `fact_content`
+- `source_document_id`
+- `verification_status`
+- `verified_at`
+- `created_at`
+- `updated_at`
+
+### 11.3 `career_documents`
+
+Stores metadata for uploaded and generated career documents.
+
+Possible fields:
+- `id`
+- `user_id`
+- `document_type`
+- `file_path`
+- `original_filename`
+- `mime_type`
+- `processing_status`
+- `created_at`
+- `updated_at`
+
+### 11.4 `document_versions`
+
+Stores version history for CVs, cover letters, and other application documents.
+
+Possible fields:
+- `id`
+- `document_id`
+- `opportunity_id`
+- `version_number`
+- `content`
+- `generation_metadata`
+- `created_at`
+
+### 11.5 `opportunities`
+
+Stores normalized opportunity information.
+
+Possible fields:
+- `id`
+- `title`
+- `organization`
+- `category`
+- `description`
+- `location`
+- `work_arrangement`
+- `requirements`
+- `eligibility`
+- `deadline`
+- `original_url`
+- `publication_date`
+- `last_verified_at`
+- `status`
+- `created_at`
+- `updated_at`
+
+### 11.6 `opportunity_sources`
+
+Stores information about opportunity providers and source integrations.
+
+Possible fields:
+- `id`
+- `name`
+- `source_type`
+- `base_url`
+- `integration_status`
+- `configuration`
+- `created_at`
+- `updated_at`
+
+Secrets and credentials must not be stored as exposed configuration values.
+
+### 11.7 `user_opportunities`
+
+Connects users to opportunities they have saved or assessed.
+
+Possible fields:
+- `id`
+- `user_id`
+- `opportunity_id`
+- `saved_status`
+- `fit_score`
+- `fit_explanation`
+- `skill_gap_summary`
+- `created_at`
+- `updated_at`
+
+### 11.8 `source_sync_runs`
+
+Tracks source ingestion and synchronization activity.
+
+Possible fields:
+- `id`
+- `source_id`
+- `started_at`
+- `completed_at`
+- `status`
+- `records_processed`
+- `records_created`
+- `records_updated`
+- `records_failed`
+- `error_summary`
+
+### 11.9 `applications`
+
+Stores application records and their current status.
+
+Possible fields:
+- `id`
+- `user_id`
+- `opportunity_id`
+- `status`
+- `application_url`
+- `submitted_at`
+- `deadline`
+- `next_follow_up_at`
+- `submission_method`
+- `submission_confirmation`
+- `notes`
+- `created_at`
+- `updated_at`
+
+### 11.10 `application_answers`
+
+Stores application question responses and their review state.
+
+Possible fields:
+- `id`
+- `application_id`
+- `question`
+- `answer`
+- `answer_source`
+- `verification_status`
+- `approved_at`
+- `created_at`
+- `updated_at`
+
+### 11.11 `application_events`
+
+Maintains a history of important application events.
+
+Possible fields:
+- `id`
+- `application_id`
+- `event_type`
+- `event_details`
+- `created_at`
+
+### 11.12 `consents`
+
+Records relevant permissions and approval decisions.
+
+Possible fields:
+- `id`
+- `user_id`
+- `consent_type`
+- `scope`
+- `status`
+- `granted_at`
+- `revoked_at`
+- `metadata`
+
+The final schema should enforce appropriate foreign keys, uniqueness constraints, indexes, retention policies, and authorization controls.
+
+## 12. Integrations
+
+### 12.1 Opportunity Sources
+
+The system should support an extensible integration strategy for:
+
+- Greenhouse and Lever job listings or supported integrations.
+- Licensed job and opportunity feeds.
+- Public job and opportunity APIs.
+- Company career pages where access is permitted.
+- Supported external opportunity platforms.
+- User-submitted URLs.
+
+Each source should have its own ingestion, normalization, error-handling, and monitoring logic.
+
+The availability of an integration must not be assumed until its access method, permissions, and technical requirements are verified.
+
+### 12.2 AI Provider
+
+The platform should use an AI service abstraction to support model changes, provider evaluation, structured outputs, and cost management.
+
+### 12.3 Email and Notifications
+
+An email or notification provider should support account-related messages, application reminders, and user-configured alerts.
+
+### 12.4 Document Services
+
+The platform should support secure processing and generation of common career-document formats.
+
+### 12.5 Browser-Assisted Automation
+
+Browser automation may be added for supported application workflows where legally and technically appropriate.
+
+Such automation must respect site terms, authentication requirements, user consent, and approval controls.
+
+## 13. Security, Privacy, and Compliance
+
+Security and privacy are foundational product requirements.
+
+### 13.1 Authentication and Authorization
+
+- Use a secure authentication mechanism.
+- Enforce server-side authorization for sensitive actions.
+- Apply PostgreSQL Row Level Security where appropriate.
+- Prevent users from accessing other users' career profiles, documents, and applications.
+- Protect administrative functions with appropriate role-based permissions.
+
+### 13.2 Document Security
+
+- Store private documents in private storage.
+- Use appropriately scoped, short-lived signed URLs where needed.
+- Validate file types and enforce upload limits.
+- Prevent unauthorized document access.
+- Apply secure processing controls to uploaded files.
+
+### 13.3 Secrets and Credentials
+
+- Keep API keys and integration secrets on the server side.
+- Never expose privileged credentials in frontend code.
+- Use secure environment configuration and appropriate secret management.
+- Avoid storing third-party account passwords unless a specific, justified, secure integration requires it.
+
+### 13.4 User Consent and Approval
+
+- Obtain explicit approval before supported external application submissions.
+- Make automation permissions understandable and revocable.
+- Keep a record of relevant approvals and actions.
+- Do not treat consent to prepare an application as consent to submit it.
+
+### 13.5 Data Rights and Retention
+
+Users should have appropriate ways to access, export, correct, and request deletion of their personal information.
+
+Retention and deletion policies should cover career documents, extracted information, generated materials, logs, and connected integrations, subject to applicable legal requirements.
+
+### 13.6 External Content and Abuse Prevention
+
+The platform must protect against prompt injection, malicious links, unsafe file uploads, unauthorized tool calls, and misuse of integrations.
+
+### 13.7 Compliance Review
+
+Before launching in relevant markets, review applicable data protection, privacy, employment, consumer protection, intellectual property, and website-access requirements.
+
+## 14. Non-Functional Requirements
+
+### 14.1 Performance
+
+- Common dashboard and profile reads should target a p95 response time under two seconds under representative operating conditions, excluding external-provider latency.
+- Long-running AI and document-processing tasks should run asynchronously where appropriate.
+- Search and filtering should remain responsive as opportunity records grow.
+- Expensive operations should use caching or other optimizations where justified.
+
+### 14.2 Reliability
+
+- The system should implement retries and error handling for transient failures.
+- Background jobs should be observable and recoverable.
+- Duplicate job processing should not create duplicate applications or other unintended side effects.
+- The production service should target 99.5% availability after the pilot, subject to the agreed service definition and operational arrangements.
+
+### 14.3 Scalability
+
+- The data model should support growth in users, opportunity records, documents, and application activity.
+- Opportunity-source integrations should scale independently where practical.
+- AI usage should be monitored and controlled through appropriate rate limits and cost controls.
+
+### 14.4 Accessibility
+
+The interface should target WCAG 2.2 AA accessibility practices, including keyboard navigation, readable contrast, accessible form labels, and appropriate screen-reader support.
+
+### 14.5 Maintainability
+
+- Use clear module boundaries and documented interfaces.
+- Maintain automated tests for critical business logic.
+- Keep configuration separate from source code.
+- Support reliable schema migrations.
+- Document integration setup, operational procedures, and failure recovery.
+
+### 14.6 Security Quality
+
+No unresolved critical or high-severity security defects should remain at launch.
+
+## 15. Analytics and Product Metrics
+
+The platform should collect privacy-conscious analytics that help evaluate product value and identify operational problems.
+
+### 15.1 Activation
+
+Measure:
+- Registration completion.
+- Profile completion.
+- CV upload and successful extraction.
+- First opportunity viewed.
+- First opportunity saved.
+- First application material generated.
+
+### 15.2 Discovery Quality
+
+Measure:
+- Opportunities discovered per user.
+- Search-to-detail-view conversion.
+- Save rate.
+- Recommendation engagement.
+- Duplicate listing rate.
+- Stale or unavailable listing rate.
+- Source coverage and source reliability.
+
+### 15.3 Application Preparation
+
+Measure:
+- CVs generated and exported.
+- Cover letters generated and edited.
+- Application questions drafted.
+- Percentage of generated materials reviewed or modified.
+- User-reported usefulness and factual accuracy.
+
+### 15.4 Application Outcomes
+
+Measure:
+- Applications prepared.
+- Applications submitted or marked submitted.
+- Interview invitations recorded.
+- Offers recorded.
+- Follow-up completion.
+- User-reported application outcomes.
+
+Outcome metrics must distinguish recorded outcomes from verified external outcomes.
+
+### 15.5 Reliability and Cost
+
+Measure:
+- AI generation success and failure rates.
+- AI latency and cost per workflow.
+- Document-processing failure rate.
+- Source synchronization success.
+- Search latency.
+- Background job failures.
+- Security and authorization incidents.
+
+### 15.6 Initial Pilot Targets
+
+Suggested targets to validate and refine during the pilot include:
+
+- At least 70% of users who begin onboarding complete a usable career profile.
+- At least 60% of activated users save an opportunity or begin preparing an application.
+- At least 80% of evaluated generated application materials meet the agreed factual-grounding criteria.
+- At least 90% of sampled opportunity records contain the required core fields when those fields are available from the source.
+- No unauthorized external application submissions.
+- No unresolved critical or high-severity security defects at launch.
+
+These are proposed product targets, not existing performance claims.
+
+## 16. Risks and Mitigations
+
+### 16.1 Unreliable Opportunity Data
+
+**Risk:** Listings may be outdated, duplicated, incomplete, or unavailable.
+
+**Mitigation:** Track source attribution, verification information, ingestion status, and duplicate detection. Provide reporting mechanisms for users.
+
+### 16.2 AI Hallucinations
+
+**Risk:** Generated documents may contain false or exaggerated claims.
+
+**Mitigation:** Ground generation in verified career facts, flag missing information, preserve source references where practical, and require user review.
+
+### 16.3 External Source Restrictions
+
+**Risk:** Opportunity providers may restrict automated access or change their interfaces.
+
+**Mitigation:** Prioritize authorized APIs, licensed feeds, and permitted access methods. Make source integrations replaceable.
+
+### 16.4 Poor Opportunity Matching
+
+**Risk:** Recommendations may overlook qualified candidates or recommend unsuitable opportunities.
+
+**Mitigation:** Use transparent matching criteria, account for missing data, evaluate representative cases, and collect user feedback.
+
+### 16.5 Unauthorized Automation
+
+**Risk:** An application could be submitted without proper approval or to an unintended destination.
+
+**Mitigation:** Implement explicit, action-specific approval, clear destination previews, authorization checks, and auditable action records.
+
+### 16.6 Sensitive Career Information Exposure
+
+**Risk:** Personal documents and career histories may be exposed.
+
+**Mitigation:** Apply strict access controls, private storage, secure logging, encryption where appropriate, and clear retention policies.
+
+### 16.7 Excessive AI and Infrastructure Costs
+
+**Risk:** High-volume discovery and document generation could create unsustainable costs.
+
+**Mitigation:** Track usage, optimize prompts, use appropriate models for each task, apply rate limits, and monitor cost per user workflow.
+
+## 17. Dependencies and Assumptions
+
+The product depends on:
+
+- Access to reliable and appropriately authorized opportunity sources.
+- A supported AI provider and associated service credentials.
+- Authentication and private document storage.
+- Document extraction and generation capabilities.
+- Background job processing.
+- Email or notification delivery.
+- A clear approach to source monitoring and data quality.
+- Defined privacy, consent, and retention policies.
+
+Key assumptions:
+
+- Users are willing to maintain a reasonably accurate career profile.
+- Personalized recommendations will provide more value than unfiltered opportunity listings.
+- Users want AI assistance but retain control over final application content and submission.
+- Global opportunity discovery will require different source strategies across markets.
+- Some external platforms will not support automated application submission.
+
+## 18. Definition of Done
+
+The initial product is ready for release when:
+
+- Users can securely register and manage their career profiles.
+- Users can upload a CV and review extracted information.
+- Supported sources can provide normalized opportunity records.
+- Users can search, filter, save, and import supported opportunities.
+- Duplicate opportunities are handled appropriately.
+- Fit assessments provide grounded explanations.
+- Users can generate, edit, version, and export application materials.
+- Generated materials do not knowingly introduce unsupported personal claims.
+- Users can manage applications and relevant deadlines.
+- External submission actions require explicit approval.
+- The platform accurately represents submission status.
+- Private user information is protected by appropriate authorization controls.
+- Critical workflows have automated tests and documented error handling.
+- Essential analytics and operational monitoring are available.
+- Security and privacy reviews have been completed to the agreed launch standard.
+- No critical or high-severity security defects remain unresolved.
+
+## 19. Open Product Decisions
+
+The following decisions should be resolved as product development progresses:
+
+1. **Opportunity categories:** Which categories beyond jobs, internships, fellowships, scholarships, and grants should be supported first?
+2. **Initial source integrations:** Which authorized APIs, feeds, and career platforms provide the best combination of coverage and reliability?
+3. **Monetization:** Will the platform use subscriptions, usage-based pricing, institutional plans, or another model?
+4. **AI provider strategy:** Which models best meet quality, latency, privacy, and cost requirements?
+5. **Application automation coverage:** Which destinations can support reliable and permitted integrated submission?
+6. **Document design:** What CV templates and export formats should be supported initially?
+7. **Geographic personalization:** How should the system handle country-specific eligibility, work authorization, compensation, and date formats?
+8. **Outcome verification:** Which application outcomes can be verified through integrations, and which will rely on user updates?
+9. **Administrative governance:** Which source-management, moderation, and user-support workflows are required for launch?
+10. **Institutional features:** Should university, employer, or workforce-development dashboards become part of a future product offering?
+
+These decisions should be made using user research, technical validation, source availability, and the product's intended commercial model.
+
+## 20. Final Product Recommendation
+
+Build the AI Career Agent as a unified career and opportunity platform, not simply an AI chatbot layered over job listings.
+
+The core product value comes from connecting the user's career profile to relevant opportunities, explaining the suitability of each opportunity, preparing accurate application materials, and maintaining a reliable record of application activity.
+
+The recommended implementation sequence is capability-based rather than tied to calendar dates:
+
+1. Establish authentication, profile management, and secure document handling.
+2. Build opportunity ingestion, normalization, search, and discovery.
+3. Introduce grounded fit analysis and personalized recommendations.
+4. Deliver application preparation, editing, and export.
+5. Add application tracking, reminders, and approval-gated actions.
+6. Expand integrations and automation based on demonstrated user value and supported external workflows.
+
+The guiding principle is to **make the platform useful, accurate, and trustworthy before expanding automation**.
+
+The result should be a career assistant that helps users discover better opportunities, prepare stronger applications, and manage their professional progress with greater clarity and less repetitive work.
