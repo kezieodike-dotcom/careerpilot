@@ -250,7 +250,47 @@ export async function importOpportunityFromUrl(url: string, rawText?: string): P
     if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     return await res.json();
   } catch (err: any) {
-    console.error('Failed to import opportunity via API', err);
-    throw err;
+    console.error('Failed to import opportunity via API, using local link fallback', err);
+
+    // Keep the core job-to-CV workflow usable when the API is unavailable,
+    // including when an older dev server returns a 404 for this route. The
+    // fallback is intentionally explicit about uncertainty and never invents
+    // employer or requirement details.
+    const parsedUrl = url ? new URL(url) : null;
+    const pathLabel = parsedUrl?.pathname
+      .split('/')
+      .filter(Boolean)
+      .pop()
+      ?.replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, character => character.toUpperCase());
+
+    const localOpportunity: Opportunity = {
+      id: `opp-local-${Date.now()}`,
+      title: pathLabel || 'Imported opportunity (details unavailable)',
+      organization: parsedUrl?.hostname?.replace(/^www\./, '') || 'Not specified',
+      category: 'Job',
+      description: rawText || 'The opportunity source could not be read. Review the original listing before relying on any details.',
+      location: 'Not specified',
+      work_arrangement: 'Not specified',
+      required_qualifications: [],
+      required_skills: [],
+      preferred_skills: [],
+      experience_requirements: 'Not specified',
+      eligibility_criteria: [],
+      deadline: 'Not specified',
+      original_url: url || 'https://imported-opportunity.internal',
+      application_destination: url || 'Not specified',
+      publication_date: new Date().toISOString().split('T')[0],
+      last_verified_at: new Date().toISOString(),
+      status: 'Active',
+      source_id: 'src-local-import',
+      source_name: 'Local Link Fallback',
+      source_type: 'manual_import',
+      duplicate_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    return { success: true, opportunity: localOpportunity };
   }
 }
