@@ -241,21 +241,8 @@ export async function importOpportunityFromUrl(url: string, rawText?: string): P
       throw new Error('Enter a valid public opportunity URL.');
     }
   }
-  try {
-    const res = await fetch('/api/ai/import-opportunity', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, rawText }),
-    });
-    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-    return await res.json();
-  } catch (err: any) {
-    console.error('Failed to import opportunity via API, using local link fallback', err);
 
-    // Keep the core job-to-CV workflow usable when the API is unavailable,
-    // including when an older dev server returns a 404 for this route. The
-    // fallback is intentionally explicit about uncertainty and never invents
-    // employer or requirement details.
+  const createLocalOpportunity = (): Opportunity => {
     const parsedUrl = url ? new URL(url) : null;
     const pathLabel = parsedUrl?.pathname
       .split('/')
@@ -264,7 +251,7 @@ export async function importOpportunityFromUrl(url: string, rawText?: string): P
       ?.replace(/[-_]+/g, ' ')
       .replace(/\b\w/g, character => character.toUpperCase());
 
-    const localOpportunity: Opportunity = {
+    return {
       id: `opp-local-${Date.now()}`,
       title: pathLabel || 'Imported opportunity (details unavailable)',
       organization: parsedUrl?.hostname?.replace(/^www\./, '') || 'Not specified',
@@ -290,7 +277,29 @@ export async function importOpportunityFromUrl(url: string, rawText?: string): P
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+  };
 
-    return { success: true, opportunity: localOpportunity };
+  // The Vercel project may be configured as a static build without server
+  // functions. Keep the live workflow independent of that deployment detail.
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
+    return { success: true, opportunity: createLocalOpportunity() };
+  }
+
+  try {
+    const res = await fetch('/api/ai/import-opportunity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, rawText }),
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    return await res.json();
+  } catch (err: any) {
+    console.error('Failed to import opportunity via API, using local link fallback', err);
+
+    // Keep the core job-to-CV workflow usable when the API is unavailable,
+    // including when an older dev server returns a 404 for this route. The
+    // fallback is intentionally explicit about uncertainty and never invents
+    // employer or requirement details.
+    return { success: true, opportunity: createLocalOpportunity() };
   }
 }
