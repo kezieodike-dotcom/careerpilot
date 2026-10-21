@@ -1,6 +1,6 @@
 {
   "name": "Career Pilot",
-  "description": "Intelligent career and opportunity platform with grounded AI profiling, opportunity discovery, fit analysis, document tailoring, and application management.",
+  "description": "A focused job-to-CV optimizer that tailors a provided CV to a specific job posting without inventing experience or qualifications.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

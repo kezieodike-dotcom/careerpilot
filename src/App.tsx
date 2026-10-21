@@ -3,535 +3,111 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Profile, 
-  CareerFact, 
-  Opportunity, 
-  Application, 
-  OpportunitySource, 
-  SourceSyncRun, 
-  ConsentRecord,
-  PersonaType, 
-  ApplicationStatus 
-} from './types';
-import { loadStoredData, saveStoredData, resetStoredData } from './utils/storage';
+import React, { useState } from 'react';
+import { FileText, Link2, Sparkles, Upload, Download, Copy, Check, RotateCcw, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { extractCVFacts, generateMaterials, importOpportunityFromUrl } from './utils/api';
+import { CareerFact, Opportunity } from './types';
 
-// Views
-import { DashboardView } from './components/DashboardView';
-import { DiscoverView } from './components/DiscoverView';
-import { CareerProfileView } from './components/CareerProfileView';
-import { ApplicationStudioView } from './components/ApplicationStudioView';
-import { ApplicationsView } from './components/ApplicationsView';
-import { AdminView } from './components/AdminView';
-import { SettingsView } from './components/SettingsView';
-import { ApprovalSubmissionModal } from './components/ApprovalSubmissionModal';
-import { CreateProfileModal } from './components/CreateProfileModal';
-
-// Icons
-import { 
-  Settings, 
-  LayoutDashboard,
-  Compass,
-  UserRound,
-  FileText,
-  BriefcaseBusiness,
-  ShieldCheck,
-} from 'lucide-react';
+type WorkflowStatus = 'idle' | 'reading' | 'analyzing' | 'optimizing' | 'complete' | 'error';
 
 export default function App() {
-  const [data, setData] = useState(() => {
-    const loaded = loadStoredData();
-    const seededProfile = loaded.profiles.active_job_seeker;
-    // Migrate the original demo persona once so existing local sessions see the
-    // new default identity without overwriting a name the user has chosen.
-    if (seededProfile && ['Elena Rostova', 'Kezie Odike'].includes(seededProfile.full_name)) {
-      return {
-        ...loaded,
-        profiles: {
-          ...loaded.profiles,
-          active_job_seeker: {
-            ...seededProfile,
-            id: 'prof-chikezie',
-            user_id: 'user-chikezie',
-            full_name: 'Chikezie Onyiaodike',
-            email: 'chikezie.onyiaodike@example.com',
-          },
-        },
-        facts: loaded.facts.map(f => f.user_id === 'user-elena' ? { ...f, user_id: 'user-chikezie' } : f),
-        applications: loaded.applications.map(a => a.user_id === 'user-elena' ? { ...a, user_id: 'user-chikezie' } : a),
-      };
+  const [jobUrl, setJobUrl] = useState('');
+  const [jobText, setJobText] = useState('');
+  const [cvText, setCvText] = useState('');
+  const [cvFilename, setCvFilename] = useState('');
+  const [status, setStatus] = useState<WorkflowStatus>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [error, setError] = useState('');
+  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
+  const [optimizedCV, setOptimizedCV] = useState('');
+  const [groundingNotes, setGroundingNotes] = useState<string[]>([]);
+  const [copied, setCopied] = useState(false);
+
+  const busy = status === 'reading' || status === 'analyzing' || status === 'optimizing';
+  const canOptimize = jobUrl.trim().length > 0 && cvText.trim().length > 0 && !busy;
+
+  const handleCVFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError('');
+    setCvFilename(file.name);
+    const reader = new FileReader();
+    reader.onload = () => setCvText(String(reader.result || ''));
+    reader.onerror = () => setError('We could not read that file. Paste your CV text instead.');
+    reader.readAsText(file);
+  };
+
+  const handleOptimize = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!canOptimize) return;
+    setError(''); setOptimizedCV(''); setGroundingNotes([]);
+    try {
+      setStatus('reading'); setStatusMessage('Reading the job requirements…');
+      const imported = await importOpportunityFromUrl(jobUrl.trim(), jobText.trim() || undefined);
+      setOpportunity(imported.opportunity);
+
+      setStatus('analyzing'); setStatusMessage('Extracting experience and skills from your CV…');
+      const extracted = await extractCVFacts(cvText.trim(), cvFilename || 'career-profile.txt');
+      const now = new Date().toISOString();
+      const facts: CareerFact[] = extracted.facts.map((fact: any, index: number) => ({
+        id: `provided-cv-fact-${index}`, user_id: 'current-user', fact_type: fact.fact_type || 'experience',
+        title: fact.title || 'Career experience', subtitle: fact.subtitle, date_range: fact.date_range,
+        description: fact.description || '', highlights: fact.highlights || [], skills: fact.skills || [],
+        verification_status: 'verified', verified_at: now, confidence_score: fact.confidence_score,
+        created_at: now, updated_at: now,
+      }));
+
+      setStatus('optimizing'); setStatusMessage('Tailoring your CV to the role…');
+      const cvLines = cvText.trim().split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+      const candidateName = cvLines[0] || 'Candidate';
+      const candidateEmail = cvText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || '';
+      const generated = await generateMaterials('cv', {
+        id: 'profile-current-user', user_id: 'current-user', full_name: candidateName, email: candidateEmail, location: 'Not specified',
+        professional_summary: cvText.trim().slice(0, 500), career_goals: 'Secure the target opportunity.', preferred_roles: [],
+        preferred_locations: [], preferred_work_arrangements: [], preferred_opportunity_types: ['Job'],
+        eligibility_status: { work_authorization: [], highest_degree: 'Not specified', years_of_experience: 0, citizenship: 'Not specified', willing_to_relocate: false },
+        profile_completeness: 100, created_at: now, updated_at: now,
+      }, facts, imported.opportunity, 'Preserve the candidate’s name and contact details from the provided CV. Optimize relevance, ordering, wording, and ATS keyword alignment without adding unsupported claims.');
+
+      setOptimizedCV(generated.result.content || '');
+      setGroundingNotes(generated.result.missing_facts_flagged || []);
+      setStatus('complete'); setStatusMessage('Your optimized CV is ready to review.');
+    } catch (err: any) {
+      setStatus('error'); setStatusMessage(''); setError(err.message || 'We could not optimize the CV. Check the link and try again.');
     }
-    return loaded;
-  });
-  const [currentView, setCurrentView] = useState<
-    'dashboard' | 'discover' | 'profile' | 'studio' | 'applications' | 'admin' | 'settings'
-  >('dashboard');
-
-  // Studio target opportunity
-  const [studioTargetOpportunity, setStudioTargetOpportunity] = useState<Opportunity | null>(null);
-
-  // Approval modal state
-  const [approvalModalApp, setApprovalModalApp] = useState<Application | null>(null);
-  const [isCreateProfileOpen, setIsCreateProfileOpen] = useState(false);
-
-  // Sync to localStorage
-  useEffect(() => {
-    saveStoredData({
-      activePersona: data.activePersona,
-      profiles: data.profiles,
-      facts: data.facts,
-      opportunities: data.opportunities,
-      applications: data.applications,
-      sources: data.sources,
-      syncRuns: data.syncRuns,
-      consents: data.consents,
-      onboardingComplete: data.onboardingComplete,
-    });
-  }, [data]);
-
-  const currentProfile = data.profiles[data.activePersona] || data.profiles.active_job_seeker;
-  const currentFacts = data.facts.filter(f => f.user_id === currentProfile.user_id);
-  // Applications are user-scoped. Keeping this filter at the application boundary
-  // prevents one persona's pipeline from leaking into another persona's workspace.
-  const currentApplications = data.applications.filter(a => a.user_id === currentProfile.user_id);
-  const savedOppIds = new Set(currentApplications.map(a => a.opportunity_id));
-
-  // Persona switcher handler
-  const handlePersonaChange = (newPersona: PersonaType) => {
-    setData(prev => ({
-      ...prev,
-      activePersona: newPersona,
-    }));
   };
 
-  const handleCreateProfile = (profile: Profile) => {
-    setData(prev => ({
-      ...prev,
-      profiles: { ...prev.profiles, [prev.activePersona]: profile },
-      onboardingComplete: true,
-    }));
+  const handleCopy = async () => {
+    if (!optimizedCV) return;
+    await navigator.clipboard.writeText(optimizedCV); setCopied(true); window.setTimeout(() => setCopied(false), 1800);
   };
 
-  // Opportunity Save / Unsave
-  const handleToggleSaveOpportunity = (oppId: string) => {
-    setData(prev => {
-      const exists = prev.applications.some(a => a.user_id === currentProfile.user_id && a.opportunity_id === oppId);
-      if (exists) {
-        return {
-          ...prev,
-          applications: prev.applications.filter(a => !(a.user_id === currentProfile.user_id && a.opportunity_id === oppId)),
-        };
-      } else {
-        const opp = prev.opportunities.find(o => o.id === oppId);
-        if (!opp) return prev;
-        const newApp: Application = {
-          id: `app-${Date.now()}`,
-          user_id: currentProfile.user_id,
-          opportunity_id: oppId,
-          status: 'Saved',
-          application_url: opp.original_url,
-          deadline: opp.deadline,
-          submission_method: 'User Guided / External Portal',
-          notes: 'Saved from discovery catalog',
-          cv_versions: [],
-          cover_letter_versions: [],
-          screening_answers: [],
-          events: [
-            {
-              id: `evt-${Date.now()}`,
-              application_id: `app-${Date.now()}`,
-              event_type: 'created',
-              event_details: 'Opportunity saved to pipeline',
-              timestamp: new Date().toISOString(),
-            }
-          ],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        return {
-          ...prev,
-          applications: [newApp, ...prev.applications],
-        };
-      }
-    });
+  const handleDownload = () => {
+    const blob = new Blob([optimizedCV], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'career-pilot-optimized-cv.md'; link.click(); URL.revokeObjectURL(url);
   };
 
-  // Profile update
-  const handleUpdateProfile = (updatedProfile: Profile) => {
-    setData(prev => ({
-      ...prev,
-      profiles: {
-        ...prev.profiles,
-        [data.activePersona]: updatedProfile,
-      }
-    }));
+  const reset = () => {
+    setJobUrl(''); setJobText(''); setCvText(''); setCvFilename(''); setStatus('idle'); setStatusMessage(''); setError(''); setOpportunity(null); setOptimizedCV(''); setGroundingNotes([]);
   };
-
-  // Fact handlers
-  const handleAddFact = (newFact: CareerFact) => {
-    setData(prev => ({
-      ...prev,
-      facts: [newFact, ...prev.facts],
-    }));
-  };
-
-  const handleVerifyFact = (factId: string) => {
-    setData(prev => ({
-      ...prev,
-      facts: prev.facts.map(f => f.id === factId ? {
-        ...f,
-        verification_status: 'verified',
-        verified_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } : f)
-    }));
-  };
-
-  const handleDeleteFact = (factId: string) => {
-    setData(prev => ({
-      ...prev,
-      facts: prev.facts.filter(f => f.id !== factId)
-    }));
-  };
-
-  const handleUpdateFact = (updatedFact: CareerFact) => {
-    setData(prev => ({
-      ...prev,
-      facts: prev.facts.map(f => f.id === updatedFact.id ? updatedFact : f)
-    }));
-  };
-
-  // New opportunity imported
-  const handleOpportunityImported = (newOpp: Opportunity) => {
-    setData(prev => ({
-      ...prev,
-      opportunities: [newOpp, ...prev.opportunities],
-    }));
-  };
-
-  // Application Save from Studio
-  const handleSaveApplicationPackage = (updatedApp: Application) => {
-    setData(prev => {
-      const index = prev.applications.findIndex(a => a.id === updatedApp.id);
-      let updatedApps = [...prev.applications];
-      if (index >= 0) {
-        updatedApps[index] = updatedApp;
-      } else {
-        updatedApps = [updatedApp, ...updatedApps];
-      }
-      return {
-        ...prev,
-        applications: updatedApps,
-      };
-    });
-  };
-
-  // Application Status Change
-  const handleUpdateApplicationStatus = (appId: string, newStatus: ApplicationStatus) => {
-    // FR-019: changing a status to Submitted is itself a consequential action.
-    // Route it through the action-specific approval gate instead of allowing a
-    // dropdown change to bypass the confirmation modal.
-    if (newStatus === 'Submitted') {
-      const application = data.applications.find(a => a.id === appId && a.user_id === currentProfile.user_id);
-      if (application) setApprovalModalApp(application);
-      return;
-    }
-    setData(prev => ({
-      ...prev,
-      applications: prev.applications.map(a => a.id === appId ? {
-        ...a,
-        status: newStatus,
-        events: [
-          ...a.events,
-          {
-            id: `evt-${Date.now()}`,
-            application_id: a.id,
-            event_type: 'status_changed',
-            event_details: `Status transitioned to ${newStatus}`,
-            timestamp: new Date().toISOString(),
-          }
-        ],
-        updated_at: new Date().toISOString(),
-      } : a)
-    }));
-  };
-
-  // Approval Submission Callback
-  const handleApproveAndSubmit = (consentRecord: ConsentRecord, confirmationCode: string, notes: string) => {
-    if (!approvalModalApp) return;
-
-    setData(prev => ({
-      ...prev,
-      consents: [consentRecord, ...prev.consents],
-      applications: prev.applications.map(a => a.id === approvalModalApp.id ? {
-        ...a,
-        status: 'Submitted',
-        submitted_at: new Date().toISOString(),
-        submission_confirmation: {
-          confirmed_at: new Date().toISOString(),
-          confirmation_code: confirmationCode || undefined,
-          notes: notes || 'Explicit user approval verified and recorded',
-        },
-        events: [
-          ...a.events,
-          {
-            id: `evt-${Date.now()}-appr`,
-            application_id: a.id,
-            event_type: 'approval_granted',
-            event_details: `Explicit user approval granted: ${consentRecord.scope}`,
-            timestamp: new Date().toISOString(),
-          },
-          {
-            id: `evt-${Date.now()}-sub`,
-            application_id: a.id,
-            event_type: 'submitted',
-            event_details: `Application marked as submitted. Confirmation: ${confirmationCode || 'Recorded'}`,
-            timestamp: new Date().toISOString(),
-          }
-        ],
-        updated_at: new Date().toISOString(),
-      } : a)
-    }));
-
-    setApprovalModalApp(null);
-  };
-
-  // Admin trigger sync
-  const handleTriggerSync = (sourceId: string) => {
-    setData(prev => {
-      const src = prev.sources.find(s => s.id === sourceId);
-      const newSyncRun: SourceSyncRun = {
-        id: `run-${Date.now()}`,
-        source_id: sourceId,
-        source_name: src?.name || 'Upstream Feed',
-        started_at: new Date(Date.now() - 30000).toISOString(),
-        completed_at: new Date().toISOString(),
-        status: 'Completed',
-        records_processed: 48,
-        records_created: 3,
-        records_updated: 14,
-        records_failed: 0,
-      };
-
-      return {
-        ...prev,
-        sources: prev.sources.map(s => s.id === sourceId ? {
-          ...s,
-          last_synced_at: new Date().toISOString(),
-          records_count: s.records_count + 3,
-        } : s),
-        syncRuns: [newSyncRun, ...prev.syncRuns],
-      };
-    });
-  };
-
-  // Reset demo
-  const handleResetData = () => {
-    resetStoredData();
-    window.location.reload();
-  };
-
-  if (!data.onboardingComplete) {
-    return (
-      <CreateProfileModal
-        profile={currentProfile}
-        onCreate={handleCreateProfile}
-        onClose={() => undefined}
-        welcome
-      />
-    );
-  }
-
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'discover', label: 'Discover', icon: Compass },
-    { id: 'profile', label: 'Career Profile', icon: UserRound },
-    { id: 'studio', label: 'Application Studio', icon: FileText },
-    { id: 'applications', label: 'Applications', icon: BriefcaseBusiness },
-    { id: 'admin', label: 'Platform Admin', icon: ShieldCheck },
-  ] as const;
 
   return (
-    <div className="min-h-screen bg-[#f4f7f8] font-sans text-slate-900">
-      <div className="flex min-h-screen">
-        <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white">
-          <div className="px-6 py-6 border-b border-slate-100">
-            <button onClick={() => setCurrentView('dashboard')} className="flex items-center gap-3 text-left group">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white shadow-sm group-hover:bg-emerald-700 transition-colors">CP</span>
-              <span><span className="block text-sm font-bold tracking-tight">Career Pilot</span><span className="block text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Personal workspace</span></span>
-            </button>
+    <div className="min-h-screen bg-[#f4f7f8] text-slate-900">
+      <header className="border-b border-slate-200 bg-white"><div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white">CP</span><div><p className="text-sm font-bold tracking-tight">Career Pilot</p><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Job-to-CV optimizer</p></div></div><div className="hidden items-center gap-2 text-xs font-semibold text-slate-500 sm:flex"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Grounded in your CV</div></div></header>
+
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+        <section className="max-w-3xl"><p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">One focused workflow</p><h1 className="max-w-2xl text-3xl font-bold tracking-[-0.04em] text-slate-950 sm:text-5xl">Give us the job link. Get a sharper CV.</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">Career Pilot reads the requirements in a role, compares them with the CV you provide, and returns a tailored version without inventing experience, qualifications, or results.</p></section>
+
+        <form onSubmit={handleOptimize} className="mt-8 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="space-y-5">
+            <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_20px_50px_-35px_rgba(15,23,42,0.35)] sm:p-6"><div className="mb-5 flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><Link2 className="h-4 w-4" /></span><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">Step 01</p><h2 className="mt-1 text-base font-bold">Add the job link</h2><p className="mt-1 text-xs leading-5 text-slate-500">Use the public posting URL you want to target.</p></div></div><label className="block text-xs font-semibold text-slate-700">Job posting URL<input required type="url" value={jobUrl} onChange={(e) => setJobUrl(e.target.value)} placeholder="https://company.com/careers/role" className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white" /></label><label className="mt-4 block text-xs font-semibold text-slate-700">Optional job text <span className="font-normal text-slate-400">(helps when a page is protected)</span><textarea value={jobText} onChange={(e) => setJobText(e.target.value)} rows={4} placeholder="Paste the requirements here if you have them…" className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white" /></label></section>
+
+            <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_20px_50px_-35px_rgba(15,23,42,0.35)] sm:p-6"><div className="mb-5 flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700"><FileText className="h-4 w-4" /></span><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Step 02</p><h2 className="mt-1 text-base font-bold">Provide your CV</h2><p className="mt-1 text-xs leading-5 text-slate-500">Paste it here or upload a text-based CV file.</p></div></div><label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-600 transition hover:border-emerald-400 hover:bg-emerald-50/40"><Upload className="h-4 w-4" /> {cvFilename || 'Upload .txt, .md, or .rtf CV'}<input type="file" accept=".txt,.md,.rtf,text/plain,text/markdown" onChange={handleCVFile} className="sr-only" /></label><div className="my-4 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400"><span className="h-px flex-1 bg-slate-200" /> or paste below <span className="h-px flex-1 bg-slate-200" /></div><textarea required value={cvText} onChange={(e) => { setCvText(e.target.value); setCvFilename(''); }} rows={11} placeholder="Paste the full text of your current CV…" className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-6 outline-none transition focus:border-emerald-500 focus:bg-white" /></section>
           </div>
 
-          <div className="px-4 pt-5">
-            <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Workspace</p>
-            <nav className="space-y-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = currentView === item.id;
-                return <button key={item.id} onClick={() => setCurrentView(item.id)} className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition-all active:scale-[0.98] ${active ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}><Icon className={`h-4 w-4 ${active ? 'text-emerald-300' : 'text-slate-400 group-hover:text-slate-700'}`} /><span>{item.label}</span>{item.id === 'applications' && currentApplications.length > 0 && <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] ${active ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500'}`}>{currentApplications.length}</span>}</button>;
-              })}
-            </nav>
-          </div>
-
-          <div className="mt-auto p-4">
-            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-900"><span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Grounded workspace</div>
-              <p className="mt-2 text-[11px] leading-relaxed text-emerald-800/80">Generated materials use verified career facts only.</p>
-            </div>
-          </div>
-        </aside>
-
-        <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-md">
-            <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6 lg:h-20 lg:px-10">
-              <div className="flex items-center gap-3 lg:hidden"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-[10px] font-bold text-white">CP</span><span className="text-sm font-bold tracking-tight">Career Pilot</span></div>
-              <div className="hidden lg:block"><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{currentView === 'dashboard' ? 'Overview' : currentView.replace('_', ' ')}</p><h1 className="mt-1 text-lg font-bold tracking-tight text-slate-900">{currentView === 'dashboard' ? `Good to see you, ${currentProfile.full_name.split(' ')[0]}` : navItems.find(item => item.id === currentView)?.label || 'Settings'}</h1></div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 sm:px-3"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-xs font-bold text-slate-700 shadow-sm">{currentProfile.full_name.split(' ').map(n => n[0]).slice(0, 2).join('')}</span><select value={data.activePersona} onChange={(e) => handlePersonaChange(e.target.value as PersonaType)} className="max-w-[130px] bg-transparent text-[11px] font-semibold text-slate-700 outline-none sm:max-w-none" title="Switch profile"><option value="active_job_seeker">Job Seeker Profile</option><option value="early_career">Early Career Profile</option><option value="multi_opportunity">Multi-Opportunity Profile</option><option value="platform_admin">Admin Console</option></select></div>
-                <button onClick={() => setIsCreateProfileOpen(true)} className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 text-[11px] font-bold text-slate-600 transition hover:border-emerald-300 hover:text-emerald-700 sm:px-3" aria-label="Create a new profile"><UserRound className="h-4 w-4" /> <span className="hidden xl:inline">Create profile</span></button>
-                <button onClick={() => setCurrentView('settings')} className={`flex h-10 w-10 items-center justify-center rounded-xl border transition-all active:scale-[0.96] ${currentView === 'settings' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900'}`} aria-label="Settings and data rights"><Settings className="h-4 w-4" /></button>
-              </div>
-            </div>
-          </header>
-
-          <main className="mx-auto w-full max-w-[1400px] px-4 py-6 pb-24 sm:px-6 sm:py-8 lg:px-10 lg:py-10 lg:pb-10">
-        {currentView === 'dashboard' && (
-          <DashboardView
-            profile={currentProfile}
-            facts={currentFacts}
-            opportunities={data.opportunities}
-            applications={currentApplications}
-            activePersona={data.activePersona}
-            onNavigate={(view) => setCurrentView(view)}
-            onSelectOpportunityForStudio={(opp) => {
-              setStudioTargetOpportunity(opp);
-              setCurrentView('studio');
-            }}
-            onVerifyFactClick={() => setCurrentView('profile')}
-            onOpenApprovalModal={(app) => setApprovalModalApp(app)}
-          />
-        )}
-
-        {currentView === 'discover' && (
-          <DiscoverView
-            opportunities={data.opportunities}
-            savedOppIds={savedOppIds}
-            profile={currentProfile}
-            verifiedFacts={currentFacts}
-            onToggleSave={handleToggleSaveOpportunity}
-            onSelectForStudio={(opp) => {
-              setStudioTargetOpportunity(opp);
-              setCurrentView('studio');
-            }}
-            onOpportunityImported={handleOpportunityImported}
-          />
-        )}
-
-        {currentView === 'profile' && (
-          <CareerProfileView
-            profile={currentProfile}
-            facts={currentFacts}
-            onUpdateProfile={handleUpdateProfile}
-            onAddFact={handleAddFact}
-            onVerifyFact={handleVerifyFact}
-            onDeleteFact={handleDeleteFact}
-            onUpdateFact={handleUpdateFact}
-          />
-        )}
-
-        {currentView === 'studio' && (
-          <ApplicationStudioView
-            opportunities={data.opportunities}
-            applications={currentApplications}
-            selectedOpportunityId={studioTargetOpportunity?.id}
-            profile={currentProfile}
-            verifiedFacts={currentFacts}
-            onSaveApplicationPackage={handleSaveApplicationPackage}
-            onOpenApprovalModal={(app) => setApprovalModalApp(app)}
-          />
-        )}
-
-        {currentView === 'applications' && (
-          <ApplicationsView
-            applications={currentApplications}
-            opportunities={data.opportunities}
-            onUpdateApplicationStatus={handleUpdateApplicationStatus}
-            onOpenApprovalModal={(app) => setApprovalModalApp(app)}
-            onSelectForStudio={(opp) => {
-              setStudioTargetOpportunity(opp);
-              setCurrentView('studio');
-            }}
-          />
-        )}
-
-        {currentView === 'admin' && (
-          <AdminView
-            sources={data.sources}
-            syncRuns={data.syncRuns}
-            opportunities={data.opportunities}
-            consents={data.consents}
-            onTriggerSync={handleTriggerSync}
-          />
-        )}
-
-        {currentView === 'settings' && (
-          <SettingsView
-            profile={currentProfile}
-            facts={currentFacts}
-            opportunities={data.opportunities.filter(o => currentApplications.some(a => a.opportunity_id === o.id))}
-            applications={currentApplications}
-            onResetData={handleResetData}
-          />
-        )}
+          <section className="flex min-h-[420px] flex-col rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white shadow-[0_24px_60px_-35px_rgba(15,23,42,0.7)] sm:p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">Step 03</p><h2 className="mt-1 text-xl font-bold tracking-tight">Optimize your CV</h2><p className="mt-2 max-w-sm text-xs leading-5 text-slate-400">The output stays grounded in the information you provide.</p></div><Sparkles className="h-5 w-5 text-emerald-300" /></div>{status === 'idle' && <div className="flex flex-1 flex-col items-center justify-center py-12 text-center"><div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5"><ArrowRight className="h-7 w-7 text-emerald-300" /></div><p className="mt-5 text-sm font-semibold">Your optimized CV will appear here</p><p className="mt-2 max-w-xs text-xs leading-5 text-slate-400">Add both inputs, then let Career Pilot align your experience with the role.</p></div>}{busy && <div className="flex flex-1 flex-col items-center justify-center py-12 text-center"><div className="h-10 w-10 animate-pulse rounded-xl bg-emerald-400/20 ring-8 ring-emerald-400/5" /><p className="mt-6 text-sm font-semibold">{statusMessage}</p><p className="mt-2 text-xs text-slate-400">This can take a moment.</p></div>}{status === 'error' && <div className="flex flex-1 flex-col items-center justify-center py-12 text-center"><AlertCircle className="h-10 w-10 text-rose-300" /><p className="mt-5 text-sm font-semibold">Something needs attention</p><p className="mt-2 max-w-sm text-xs leading-5 text-slate-400">{error}</p></div>}{status === 'complete' && <div className="mt-6 flex flex-1 flex-col"><div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4"><p className="text-sm font-bold text-emerald-200">{opportunity?.title || 'Target role'}</p><p className="mt-1 text-xs text-emerald-100/70">{opportunity?.organization || 'Organization not specified'} · Tailored from your provided CV</p></div><textarea value={optimizedCV} onChange={(e) => setOptimizedCV(e.target.value)} className="mt-4 min-h-[300px] flex-1 resize-y rounded-2xl border border-white/10 bg-white/[0.06] p-4 font-mono text-xs leading-6 text-slate-200 outline-none focus:border-emerald-400/60" aria-label="Optimized CV" />{groundingNotes.length > 0 && <p className="mt-3 text-[11px] leading-5 text-amber-200/80">Review note: {groundingNotes.join(' ')}</p>}</div>}<div className="mt-6 flex flex-wrap gap-3"><button type="submit" disabled={!canOptimize} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 text-xs font-bold text-emerald-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40 active:scale-[0.98]"><Sparkles className="h-4 w-4" /> {busy ? 'Working…' : 'Optimize CV'}</button>{status === 'complete' && <><button type="button" onClick={handleCopy} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-bold text-white transition hover:bg-white/10 active:scale-[0.98]">{copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />} {copied ? 'Copied' : 'Copy'}</button><button type="button" onClick={handleDownload} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-bold text-white transition hover:bg-white/10 active:scale-[0.98]"><Download className="h-4 w-4" /> Download</button></>}{(status === 'complete' || status === 'error') && <button type="button" onClick={reset} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-xs font-bold text-slate-300 transition hover:bg-white/10"><RotateCcw className="h-4 w-4" /> Start over</button>}</div></section>
+        </form>
       </main>
-
-      {/* Approval Modal (FR-019 Gate) */}
-      {approvalModalApp && (
-        <ApprovalSubmissionModal
-          application={approvalModalApp}
-          opportunity={data.opportunities.find(o => o.id === approvalModalApp.opportunity_id) || data.opportunities[0]}
-          onApproveAndSubmit={handleApproveAndSubmit}
-          onClose={() => setApprovalModalApp(null)}
-        />
-      )}
-
-      {isCreateProfileOpen && (
-        <CreateProfileModal
-          profile={currentProfile}
-          onCreate={handleCreateProfile}
-          onClose={() => setIsCreateProfileOpen(false)}
-        />
-      )}
-
-      {/* Minimal Footer */}
-      <footer className="mt-auto border-t border-slate-200 bg-white py-6 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-800">Career Pilot</span>
-            <span aria-hidden="true">·</span>
-            <span>Version 1.0</span>
-            <span aria-hidden="true">·</span>
-            <span>Grounded Opportunity Platform</span>
-          </div>
-
-          <div className="flex items-center gap-4 text-slate-500">
-            <span>Explicit User Approval Enforced (FR-019)</span>
-            <span aria-hidden="true">·</span>
-            <span>Zero-Hallucination Verified Facts</span>
-          </div>
-        </div>
-      </footer>
-
-      <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-[0_12px_35px_-18px_rgba(15,23,42,0.55)] backdrop-blur-md lg:hidden" aria-label="Mobile navigation">
-        {navItems.slice(0, 5).map((item) => {
-          const Icon = item.icon;
-          const active = currentView === item.id;
-          return <button key={item.id} onClick={() => setCurrentView(item.id)} className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] font-bold transition-all active:scale-[0.95] ${active ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'}`} aria-label={item.label}><Icon className="h-4 w-4" /><span className="truncate">{item.id === 'profile' ? 'Profile' : item.id === 'studio' ? 'Studio' : item.label}</span></button>;
-        })}
-      </nav>
-    </div>
-    </div>
     </div>
   );
 }
