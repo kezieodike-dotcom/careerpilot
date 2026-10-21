@@ -1,0 +1,9 @@
+<svg width="256" height="64" viewBox="0 0 256 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Career Pilot</title>
+  <desc id="desc">Career Pilot job-to-CV optimizer logo.</desc>
+  <rect width="64" height="64" rx="17" fill="#0F172A"/>
+  <path d="M16 42C23.67 42 29 38 32 31.33C35 24.67 40.33 20.67 48 20.67" stroke="#6EE7B7" stroke-width="4.7" stroke-linecap="round"/>
+  <path d="M39.67 16.33L48 20.67L43.67 29" stroke="#6EE7B7" stroke-width="4.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="42" r="3" fill="#F8FAFC"/>
+  <text x="80" y="38" fill="#0F172A" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.8">Career Pilot</text>
+</svg>

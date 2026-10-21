@@ -1,6 +1,6 @@
 {
   "name": "Career Pilot",
-  "description": "A focused job-to-CV optimizer that tailors a provided CV to a specific job posting without inventing experience or qualifications.",
+  "description": "Career Pilot reads a job link and tailors your existing CV to the role using only your real experience, skills, and qualifications.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

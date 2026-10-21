@@ -1,0 +1,8 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Career Pilot mark</title>
+  <desc id="desc">A sharp emerald flight path rising through a dark square.</desc>
+  <rect width="96" height="96" rx="24" fill="#0F172A"/>
+  <path d="M24 63.5C35.5 63.5 43.5 57.5 48 47.5C52.5 37.5 60.5 31.5 72 31.5" stroke="#6EE7B7" stroke-width="7" stroke-linecap="round"/>
+  <path d="M59.5 25L72 31.5L65.5 44" stroke="#6EE7B7" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="24" cy="63.5" r="4.5" fill="#F8FAFC"/>
+</svg>

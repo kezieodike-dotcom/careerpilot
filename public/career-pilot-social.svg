@@ -1,0 +1,11 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#F4F7F8"/>
+  <path d="M790 0H1200V630H690C735 515 760 395 760 270C760 170 770 80 790 0Z" fill="#0F172A"/>
+  <rect x="120" y="168" width="128" height="128" rx="32" fill="#0F172A"/>
+  <path d="M152 248C176 248 193 235 203 215C213 195 230 182 254 182" stroke="#6EE7B7" stroke-width="10" stroke-linecap="round"/>
+  <path d="M227 175L254 182L247 209" stroke="#6EE7B7" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="152" cy="248" r="7" fill="#F8FAFC"/>
+  <text x="120" y="376" fill="#0F172A" font-family="Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="-2">Career Pilot</text>
+  <text x="124" y="427" fill="#475569" font-family="Arial, sans-serif" font-size="24" font-weight="500">A sharper CV for the job you want.</text>
+  <text x="840" y="315" fill="#6EE7B7" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="4">JOB-TO-CV OPTIMIZER</text>
+</svg>
