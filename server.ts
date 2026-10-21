@@ -17,6 +17,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
+// Export the shared Express app so Vercel can run the same API routes as the
+// local development server through a serverless function.
+export { app };
+
 app.use(express.json({ limit: '10mb' }));
 
 // Initialize Google GenAI client if API key is present
@@ -639,6 +643,8 @@ async function setupVite() {
   });
 }
 
-setupVite().catch(err => {
-  console.error('Error starting server:', err);
-});
+if (!process.env.VERCEL) {
+  setupVite().catch(err => {
+    console.error('Error starting server:', err);
+  });
+}
