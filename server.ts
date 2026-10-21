@@ -47,6 +47,67 @@ async function runWithTimeout<T>(promise: Promise<T>, timeoutMs: number = 2500):
   return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutHandle));
 }
 
+function buildGroundedFallbackFacts(cvText: string) {
+  const lines = cvText.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const lowerText = cvText.toLowerCase();
+  const sectionLines = (names: string[]) => {
+    const start = lines.findIndex(line => names.some(name => line.toLowerCase().includes(name)));
+    if (start < 0) return [];
+    return lines.slice(start + 1).filter(line => !/^(experience|employment|work history|education|skills|technical skills|projects|certifications?)$/i.test(line)).slice(0, 8);
+  };
+  const bulletLines = lines.filter(line => /^[-•*▪]/.test(line)).map(line => line.replace(/^[-•*▪]\s*/, '')).slice(0, 8);
+  const skillVocabulary = ['JavaScript', 'TypeScript', 'React', 'Node.js', 'Python', 'Java', 'SQL', 'PostgreSQL', 'AWS', 'Docker', 'Git', 'Figma', 'Excel'];
+  const evidencedSkills = skillVocabulary.filter(skill => lowerText.includes(skill.toLowerCase()));
+  const experience = sectionLines(['experience', 'employment', 'work history']);
+  const education = sectionLines(['education', 'academic background']);
+  const unsectionedContent = lines.slice(1).filter(line => !/^(skills?|technical skills|education|experience|employment|work history|projects?)$/i.test(line)).slice(0, 8);
+  const facts: any[] = [];
+
+  if (experience.length > 0 || bulletLines.length > 0 || unsectionedContent.length > 0) {
+    facts.push({
+      fact_type: 'experience',
+      title: experience[0] || unsectionedContent[0] || 'Experience listed in provided CV',
+      subtitle: 'Extracted from provided CV',
+      description: experience.slice(0, 5).join(' ') || unsectionedContent.slice(1, 5).join(' ') || bulletLines.slice(0, 4).join(' '),
+      highlights: bulletLines,
+      skills: evidencedSkills,
+      confidence_score: 78,
+    });
+  }
+  if (education.length > 0) {
+    facts.push({
+      fact_type: 'education',
+      title: education[0],
+      subtitle: 'Extracted from provided CV',
+      description: education.slice(0, 4).join(' '),
+      highlights: [],
+      skills: [],
+      confidence_score: 78,
+    });
+  }
+  if (evidencedSkills.length > 0) {
+    facts.push({
+      fact_type: 'skill',
+      title: 'Skills evidenced in provided CV',
+      description: 'Only skills found in the supplied CV text are included.',
+      highlights: [],
+      skills: evidencedSkills,
+      confidence_score: 82,
+    });
+  }
+  if (facts.length === 0) {
+    facts.push({
+      fact_type: 'summary',
+      title: 'CV content provided for tailoring',
+      description: lines.slice(0, 8).join(' '),
+      highlights: [],
+      skills: [],
+      confidence_score: 65,
+    });
+  }
+  return facts;
+}
+
 // -------------------------------------------------------------
 // 1. CV Text Extraction & Fact Structuring (FR-004 & FR-005)
 // -------------------------------------------------------------
@@ -114,46 +175,11 @@ ${cvText}
       }
     }
 
-    // Deterministic fallback if API key is not configured or times out
-    const lines = cvText.split('\n').map(l => l.trim()).filter(Boolean);
-    const mockExtracted = [
-      {
-        fact_type: 'experience',
-        title: lines[1] || 'Software Engineering Experience',
-        subtitle: 'Extracted from Resume Document',
-        date_range: '2022 - Present',
-        description: lines.slice(2, 5).join(' ') || 'Production engineering and distributed systems development.',
-        highlights: [
-          'Engineered resilient APIs and scaled backend throughput.',
-          'Collaborated with cross-functional product and infrastructure teams.'
-        ],
-        skills: ['TypeScript', 'Node.js', 'PostgreSQL', 'APIs'],
-        confidence_score: 92
-      },
-      {
-        fact_type: 'education',
-        title: 'B.S. in Computer Science',
-        subtitle: 'University Degree',
-        date_range: '2018 - 2022',
-        description: 'Degree coursework in algorithms, operating systems, and network protocols.',
-        highlights: ['First Class Honors / Dean’s List'],
-        skills: ['Algorithms', 'Data Structures'],
-        confidence_score: 96
-      },
-      {
-        fact_type: 'skill',
-        title: 'Core Technical Proficiencies',
-        description: 'Directly evidenced in work history.',
-        skills: ['JavaScript', 'TypeScript', 'React', 'Docker', 'Git'],
-        confidence_score: 90
-      }
-    ];
-
     res.json({
       success: true,
       source: 'deterministic_parser',
       filename: filename || 'Uploaded_CV.pdf',
-      facts: mockExtracted
+      facts: buildGroundedFallbackFacts(cvText)
     });
   } catch (err: any) {
     console.error('Error in /api/ai/cv-extract:', err);
